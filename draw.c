@@ -1,5 +1,29 @@
 #include "draw.h"
 
+//画点函数
+//point_size: 点宽度
+//sRGB
+int lcd_display_point(lcd_dev_t *lcd, int point_size,int sRGB, int x, int y)
+{
+    unsigned char *lcd_display;
+
+    x = x > lcd->width ? lcd->width : x;
+    x = x < 0   ? 0   : x;
+    y = y > lcd->height ? lcd->height : y;
+    y = y < 0   ? 0   : y;  
+
+    if(x == 0 || y == 0)
+        return 0;
+
+    lcd_display = &lcd->display[4 *(y*lcd->width+x)];    //确定屏幕的写入位置 通过y*lcd->width+x确定写入的像素点的位置
+    unsigned char sRGB_buf[4] = {(sRGB>>24)&0xff, (sRGB>>16)&0xff, (sRGB>>8)&0xff, sRGB&0xff};  //拆分颜色
+
+    memcpy(lcd_display, sRGB_buf, 4);
+
+
+    return 1;
+}
+
 //画直线(x1,y1为起点坐标，x2,y2为终点坐标，绘制的直线包括起点，但不包括终点)
 void DrawLine(int x1, int y1, int x2, int y2, int color)
 {

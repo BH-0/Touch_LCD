@@ -7,9 +7,11 @@ int touch_init(touch_dev_t *touch, lcd_dev_t *lcd)
     touch->touch_fd = open(TOUCH_PATH, O_RDONLY);
     touch->x_size = 1024;
     touch->y_size = 600;
-    touch->x_fold = 0.78125;//(lcd->width < touch->x_size)? (lcd->width / touch->x_size) : (touch->x_size / lcd->width) ;
-    touch->y_fold = 0.8;//(lcd->height < touch->y_size)? (lcd->height / touch->y_size) : (touch->y_size / lcd->height) ;
-    printf("x_fold = %f ,y_fold = %f\r\n",touch->x_fold ,touch->y_fold);
+    //touch->x_fold = 0.78125;
+    touch->x_fold = (lcd->width < touch->x_size)? ((float)lcd->width / (float)touch->x_size) : ((float)touch->x_size / (float)lcd->width) ;
+    //touch->y_fold = 0.8;
+    touch->y_fold = (lcd->height < touch->y_size)? ((float)lcd->height / (float)touch->y_size) : ((float)touch->y_size / (float)lcd->height) ;
+    //printf("x_fold = %f ,y_fold = %f\r\n",touch->x_fold ,touch->y_fold);
     touch->ABS_X_Buf = 0;
     touch->ABS_Y_Buf = 0;
     touch->BTN_TOUCH_Buf = 0;
@@ -70,12 +72,12 @@ int get_touch_coordinates_x(touch_dev_t *touch)
 
     if(touch->BTN_TOUCH_Buf != 0)
     {
-        if(touch->ABS_X_Buf != x && touch->ABS_Y_Buf != y || next_bit > 2) //要有滑动才画点
+        if(touch->ABS_X_Buf != x && touch->ABS_Y_Buf != y && x != 0 && y != 0 || next_bit > 4) //要有滑动才画点 ，此处为开始滑动的过滤次数
         {   
             next_bit = 0;
-            if(x != 0)
+            //if(x != 0)
                 touch->ABS_X_Buf = x; 
-            if(y != 0)
+            //if(y != 0)
                 touch->ABS_Y_Buf = y;
             printf("x(%d,%d)\r\n",touch->ABS_X_Buf,touch->ABS_Y_Buf);
         }else
@@ -86,6 +88,8 @@ int get_touch_coordinates_x(touch_dev_t *touch)
     {
         x = 0;
         y = 0;
+        touch->ABS_X_Buf = 0;
+        touch->ABS_Y_Buf = 0;
         next_bit = 0;
     }
 
